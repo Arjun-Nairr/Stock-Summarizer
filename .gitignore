@@ -1,0 +1,7 @@
+node_modules/
+.wrangler/
+backend/.env
+backend/db/stock_news.db
+frontend/.claude/
+dist/
+.DS_Store
