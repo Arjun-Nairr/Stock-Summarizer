@@ -3,6 +3,7 @@ import db from "../db/database.js";
 import { fetchAllArticles, filterArticlesForCompany } from "./rssFetcher.js";
 import { summarizeNews } from "./aiSummarizer.js";
 import { fetchStockPrice } from "./stockPrice.js";
+import { runFundamentalsPipeline } from "./fundamentalsScraper.js";
 
 async function processCompany(company, allArticles, forceAI = false) {
   const aliases = JSON.parse(company.aliases);
@@ -111,12 +112,19 @@ async function runPipeline(forceAI = false) {
 }
 
 function startScheduler() {
-  // Hourly run always forces fresh AI summaries
+  // Hourly: news summaries + stock prices
   cron.schedule("0 * * * *", () => {
     console.log("[scheduler] Hourly trigger fired.");
-    runPipeline(true).catch((err) => console.error("[scheduler] Pipeline error:", err));
+    runPipeline(true).catch(err => console.error("[scheduler] Pipeline error:", err));
   });
-  console.log("[scheduler] Hourly scheduler started.");
+
+  // Daily at 8:00 AM IST (2:30 AM UTC) — fundamentals only
+  cron.schedule("30 2 * * *", () => {
+    console.log("[scheduler] Daily fundamentals trigger fired.");
+    runFundamentalsPipeline().catch(err => console.error("[scheduler] Fundamentals error:", err));
+  }, { timezone: "UTC" });
+
+  console.log("[scheduler] Hourly + daily fundamentals schedulers started.");
 }
 
 export { startScheduler, runPipeline };

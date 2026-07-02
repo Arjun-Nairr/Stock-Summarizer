@@ -11,10 +11,12 @@ router.get("/", (req, res) => {
       w.id, w.name, w.ticker,
       ns.summary, ns.verdict, ns.verdict_reason,
       ns.article_links, ns.last_updated AS news_last_updated,
-      sp.current_price, sp.day_change, sp.day_change_pct
+      sp.current_price, sp.day_change, sp.day_change_pct,
+      f.roce, f.roe, f.sales_growth
     FROM watchlist w
     LEFT JOIN news_summaries ns ON ns.company_id = w.id
     LEFT JOIN stock_prices sp ON sp.company_id = w.id
+    LEFT JOIN fundamentals f ON f.company_id = w.id
     ORDER BY w.added_at ASC
   `).all();
 

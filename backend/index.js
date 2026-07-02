@@ -4,6 +4,7 @@ import cors from "cors";
 import watchlistRoutes  from "./routes/watchlist.js";
 import companiesRoutes  from "./routes/companies.js";
 import { startScheduler, runPipeline } from "./services/scheduler.js";
+import { runFundamentalsPipeline } from "./services/fundamentalsScraper.js";
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
@@ -20,4 +21,6 @@ app.listen(PORT, () => {
   startScheduler();
   // Always run a fresh pipeline on startup so cards are never stale after a restart
   runPipeline(true).catch(err => console.error("[startup] Pipeline error:", err));
+  // Fundamentals: run on startup, daily cron keeps them fresh after that
+  runFundamentalsPipeline().catch(err => console.error("[startup] Fundamentals error:", err));
 });

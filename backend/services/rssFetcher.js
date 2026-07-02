@@ -8,6 +8,8 @@ const RSS_FEEDS = [
   "https://economictimes.indiatimes.com/industry/rssfeeds/13352306.cms",
   "https://www.moneycontrol.com/rss/latestnews.xml",
   "https://www.moneycontrol.com/rss/marketreports.xml",
+  "https://www.livemint.com/rss/markets",
+  "https://www.livemint.com/rss/companies",
 ];
 
 // Fetch all feeds and merge into one flat list of articles

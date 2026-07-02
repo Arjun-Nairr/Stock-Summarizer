@@ -49,6 +49,16 @@ db.exec(`
     recorded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (company_id) REFERENCES watchlist(id) ON DELETE CASCADE
   );
+
+  CREATE TABLE IF NOT EXISTS fundamentals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id INTEGER NOT NULL UNIQUE,
+    roce REAL,
+    roe REAL,
+    sales_growth REAL,
+    last_updated DATETIME,
+    FOREIGN KEY (company_id) REFERENCES watchlist(id) ON DELETE CASCADE
+  );
 `);
 
 // Add article_links column to existing DBs that predate this schema

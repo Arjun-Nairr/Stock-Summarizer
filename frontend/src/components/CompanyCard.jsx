@@ -1,16 +1,17 @@
 import { TrendingUp, TrendingDown, Minus, Clock, Trash2, ExternalLink } from "lucide-react";
 import CompanyAvatar from "./CompanyAvatar.jsx";
 
-function timeAgo(iso) {
+function formatDate(iso) {
   if (!iso) return null;
-  const diff  = Date.now() - new Date(iso).getTime();
-  const mins  = Math.floor(diff / 60000);
-  const hours = Math.floor(diff / 3600000);
-  const days  = Math.floor(diff / 86400000);
-  if (mins < 1)   return "just now";
-  if (mins < 60)  return `${mins}m ago`;
-  if (hours < 24) return `${hours}h ago`;
-  return `${days}d ago`;
+  return new Date(iso).toLocaleString("en-IN", {
+    day: "numeric", month: "short", year: "numeric",
+    hour: "numeric", minute: "2-digit", hour12: true,
+  });
+}
+
+function fmtFundamental(val) {
+  if (val == null) return "—";
+  return Number(val).toFixed(1) + "%";
 }
 
 function formatPrice(val) {
@@ -32,6 +33,7 @@ export default function CompanyCard({ company, onRemove }) {
     summary, verdict, verdict_reason, news_last_updated,
     article_links = [], verdict_history = [],
     current_price, day_change, day_change_pct,
+    roce, roe, sales_growth,
   } = company;
 
   const changeUp    = day_change != null && day_change >= 0;
@@ -104,14 +106,36 @@ export default function CompanyCard({ company, onRemove }) {
           {news_last_updated && (
             <span className="news-updated">
               <Clock size={11} />
-              AI summary · {timeAgo(news_last_updated)}
+              AI summary · {formatDate(news_last_updated)}
             </span>
           )}
         </div>
       ) : (
         <p className="no-summary">
-          {summary === null ? "No news found for this company in the latest fetch." : "Hit Refresh to fetch the latest news."}
+          {summary === null
+            ? "No recent news found for this company."
+            : "Hit Refresh to fetch the latest news."}
         </p>
+      )}
+
+      {/* Fundamentals row */}
+      {(roce != null || roe != null || sales_growth != null) && (
+        <div className="fundamentals-row">
+          <span className="fundamental-item">
+            <span className="fundamental-label">ROCE</span>
+            <span className="fundamental-value">{fmtFundamental(roce)}</span>
+          </span>
+          <span className="fundamental-sep">·</span>
+          <span className="fundamental-item">
+            <span className="fundamental-label">ROE</span>
+            <span className="fundamental-value">{fmtFundamental(roe)}</span>
+          </span>
+          <span className="fundamental-sep">·</span>
+          <span className="fundamental-item">
+            <span className="fundamental-label">3yr Sales Growth</span>
+            <span className="fundamental-value">{fmtFundamental(sales_growth)}</span>
+          </span>
+        </div>
       )}
 
       {/* Footer */}
