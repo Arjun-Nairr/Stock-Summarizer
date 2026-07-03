@@ -150,50 +150,6 @@ body {
 .search-already { color: var(--text-muted); font-size: 0.75rem; margin-left: 8px; }
 .search-empty { padding: 14px 18px; color: var(--text-muted); font-size: 0.88rem; }
 
-/* ── Suggestions bar ── */
-.suggestions-bar {
-  margin-bottom: 20px;
-}
-.suggestions-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 8px;
-}
-.suggestions-scroll {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
-}
-.suggestions-scroll::-webkit-scrollbar { height: 4px; }
-.suggestions-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
-.suggestion-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: 99px;
-  font-size: 0.78rem;
-  font-family: inherit;
-  color: var(--text);
-  cursor: pointer;
-  white-space: nowrap;
-  flex-shrink: 0;
-  transition: border-color 0.15s, background 0.15s;
-}
-.suggestion-chip:hover { border-color: var(--accent); background: var(--surface-hover); }
-.suggestion-chip-ticker {
-  font-size: 0.68rem;
-  color: var(--text-muted);
-}
-
 /* ── Toolbar ── */
 .toolbar {
   display: flex;
@@ -410,12 +366,12 @@ body {
 /* ── Summary block ── */
 .summary-block { display: flex; flex-direction: column; gap: 10px; }
 .summary-text  { font-size: 0.89rem; color: #c4c8df; line-height: 1.75; overflow-wrap: break-word; word-break: break-word; }
-.verdict-reason {
-  font-size: 0.81rem;
-  color: var(--text-muted);
-  font-style: italic;
-  border-left: 3px solid var(--border);
-  padding-left: 10px;
+.summary-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 .news-updated {
   display: inline-flex;
@@ -423,6 +379,47 @@ body {
   gap: 5px;
   font-size: 0.73rem;
   color: var(--text-muted);
+}
+.sources-anchor {
+  position: relative;
+}
+.sources-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.73rem;
+  color: var(--accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0;
+  transition: opacity 0.15s;
+}
+.sources-toggle:hover { opacity: 0.75; }
+
+.sources-popup {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  right: 0;
+  width: 300px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: fadeIn 0.15s ease;
+}
+.sources-popup-title {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 .no-summary { font-size: 0.87rem; color: var(--text-muted); font-style: italic; }
 
@@ -569,6 +566,56 @@ body {
   box-shadow: 0 8px 24px rgba(0,0,0,0.4);
   z-index: 9999;
   animation: fadeUp 0.2s ease;
+}
+
+/* ── Mobile ── */
+@media (max-width: 640px) {
+  .app { padding: 20px 14px 60px; }
+
+  .header { margin-bottom: 20px; }
+  .header-title h1 { font-size: 1.25rem; }
+  .header-title p  { font-size: 0.78rem; }
+  .header-title svg { width: 22px; height: 22px; }
+
+  .search-input { padding: 11px 14px 11px 40px; font-size: 0.92rem; }
+
+  .toolbar { flex-direction: column; align-items: flex-start; gap: 8px; margin-bottom: 16px; }
+  .toolbar-left, .toolbar-right { width: 100%; }
+  .sort-select { font-size: 0.8rem; flex: 1; }
+
+  .cards-grid { grid-template-columns: 1fr; gap: 14px; }
+
+  .card { padding: 16px; gap: 12px; }
+  .card-name   { font-size: 0.97rem; }
+  .card-ticker { font-size: 0.72rem; }
+
+  .price-value  { font-size: 1.2rem; }
+  .price-change { font-size: 0.82rem; }
+
+  .summary-text { font-size: 0.85rem; }
+
+  .fundamentals-row { padding: 6px 10px; gap: 6px; }
+  .fundamental-label { font-size: 0.68rem; }
+  .fundamental-value { font-size: 0.78rem; }
+
+  /* Sources popup goes full-width on mobile and drops down instead of up */
+  .sources-popup {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    border-radius: 16px 16px 0 0;
+    padding: 20px 18px 32px;
+    box-shadow: 0 -8px 40px rgba(0,0,0,0.4);
+  }
+  .sources-popup-title { font-size: 0.8rem; margin-bottom: 4px; }
+  .source-link { font-size: 0.82rem; padding: 4px 0; }
+
+  .verdict-badge { font-size: 0.72rem; padding: 4px 10px; }
+  .trail-label   { font-size: 0.68rem; }
+
+  .overlay-card { width: 90vw; padding: 28px 24px; }
 }
 
 /* ── Animations ── */

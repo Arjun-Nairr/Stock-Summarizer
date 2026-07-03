@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { BarChart2, Sun, Moon } from "lucide-react";
-import SearchBar     from "./components/SearchBar.jsx";
-import CompanyCard   from "./components/CompanyCard.jsx";
-import SkeletonCard  from "./components/SkeletonCard.jsx";
-import Toolbar       from "./components/Toolbar.jsx";
+import SearchBar      from "./components/SearchBar.jsx";
+import CompanyCard    from "./components/CompanyCard.jsx";
+import SkeletonCard   from "./components/SkeletonCard.jsx";
+import Toolbar        from "./components/Toolbar.jsx";
 import RefreshOverlay from "./components/RefreshOverlay.jsx";
 
-const BUILD = 12;
+const BUILD = 13;
 
 function sortAndFilter(list, sort, filter) {
   let out = filter === "all" ? [...list] : list.filter(c => c.verdict === filter);
@@ -17,7 +17,7 @@ function sortAndFilter(list, sort, filter) {
     case "drop":    out.sort((a, b) => (a.day_change_pct ?? 0) - (b.day_change_pct ?? 0)); break;
     case "gain":    out.sort((a, b) => (b.day_change_pct ?? 0) - (a.day_change_pct ?? 0)); break;
     case "alpha":   out.sort((a, b) => a.name.localeCompare(b.name)); break;
-    default: break; // "added" = original DB order
+    default: break;
   }
   return out;
 }
@@ -31,7 +31,6 @@ export default function App() {
   const [sort, setSort]               = useState("added");
   const [filter, setFilter]           = useState("all");
   const [darkMode, setDarkMode]       = useState(true);
-  const [suggestions, setSuggestions] = useState([]);
   const pollRef                       = useRef(null);
 
   useEffect(() => {
@@ -42,14 +41,6 @@ export default function App() {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
   }
-
-  const fetchSuggestions = useCallback(async () => {
-    try {
-      const res  = await fetch("/api/companies/suggestions");
-      const data = await res.json();
-      setSuggestions(data);
-    } catch { /* silent */ }
-  }, []);
 
   const fetchWatchlist = useCallback(async () => {
     try {
@@ -67,10 +58,9 @@ export default function App() {
 
   useEffect(() => {
     fetchWatchlist();
-    fetchSuggestions();
     const id = setInterval(fetchWatchlist, 60_000);
     return () => { clearInterval(id); clearInterval(pollRef.current); };
-  }, [fetchWatchlist, fetchSuggestions]);
+  }, [fetchWatchlist]);
 
   async function handleAdd(company) {
     try {
@@ -82,7 +72,6 @@ export default function App() {
       if (res.status === 409) { showToast("Already in watchlist"); return; }
       if (!res.ok) throw new Error();
       await fetchWatchlist();
-      fetchSuggestions();
       showToast(`${company.name} added`);
     } catch {
       showToast("Failed to add company");
@@ -93,7 +82,6 @@ export default function App() {
     try {
       await fetch(`/api/watchlist/${id}`, { method: "DELETE" });
       setWatchlist(prev => prev.filter(c => c.id !== id));
-      fetchSuggestions();
     } catch {
       showToast("Failed to remove");
     }
@@ -157,25 +145,6 @@ export default function App() {
       </div>
 
       <SearchBar onAdd={handleAdd} watchlistTickers={watchlistTickers} />
-
-      {suggestions.length > 0 && (
-        <div className="suggestions-bar">
-          <div className="suggestions-label">Quick add</div>
-          <div className="suggestions-scroll">
-            {suggestions.map(s => (
-              <button
-                key={s.ticker}
-                className="suggestion-chip"
-                onClick={() => handleAdd(s)}
-                title={`Add ${s.name} to watchlist`}
-              >
-                + {s.name}
-                <span className="suggestion-chip-ticker">{s.ticker.replace(".NS","")}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
 
       <Toolbar
         count={watchlist.length}

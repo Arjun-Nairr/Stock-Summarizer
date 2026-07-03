@@ -1,5 +1,4 @@
 import { Router } from "express";
-import db from "../db/database.js";
 import COMPANIES from "../data/companies.js";
 
 const router = Router();
@@ -18,16 +17,5 @@ router.get("/search", (req, res) => {
   res.json(matches);
 });
 
-// GET /api/companies/suggestions — returns companies not yet in watchlist (first 12 from master list)
-router.get("/suggestions", (req, res) => {
-  const inWatchlist = new Set(
-    db.prepare("SELECT ticker FROM watchlist").all().map(r => r.ticker)
-  );
-  const suggestions = COMPANIES
-    .filter(c => !inWatchlist.has(c.ticker))
-    .slice(0, 12)
-    .map(c => ({ name: c.name, ticker: c.ticker, aliases: c.aliases }));
-  res.json(suggestions);
-});
 
 export default router;

@@ -118,13 +118,13 @@ function startScheduler() {
     runPipeline(true).catch(err => console.error("[scheduler] Pipeline error:", err));
   });
 
-  // Daily at 8:00 AM IST (2:30 AM UTC) — fundamentals only
+  // Daily at 8:00 AM IST (2:30 AM UTC) — fundamentals
   cron.schedule("30 2 * * *", () => {
     console.log("[scheduler] Daily fundamentals trigger fired.");
     runFundamentalsPipeline().catch(err => console.error("[scheduler] Fundamentals error:", err));
   }, { timezone: "UTC" });
 
-  console.log("[scheduler] Hourly + daily fundamentals schedulers started.");
+  console.log("[scheduler] Hourly + daily schedulers started.");
 }
 
 export { startScheduler, runPipeline };

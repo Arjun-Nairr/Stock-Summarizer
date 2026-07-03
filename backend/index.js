@@ -19,8 +19,6 @@ app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
 app.listen(PORT, () => {
   console.log(`Backend running on http://localhost:${PORT}`);
   startScheduler();
-  // Always run a fresh pipeline on startup so cards are never stale after a restart
   runPipeline(true).catch(err => console.error("[startup] Pipeline error:", err));
-  // Fundamentals: run on startup, daily cron keeps them fresh after that
   runFundamentalsPipeline().catch(err => console.error("[startup] Fundamentals error:", err));
 });

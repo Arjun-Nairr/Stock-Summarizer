@@ -1,4 +1,5 @@
-import { TrendingUp, TrendingDown, Minus, Clock, Trash2, ExternalLink } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { TrendingUp, TrendingDown, Minus, Clock, Trash2, ExternalLink, Link2 } from "lucide-react";
 import CompanyAvatar from "./CompanyAvatar.jsx";
 
 function formatDate(iso) {
@@ -20,25 +21,44 @@ function formatPrice(val) {
 }
 
 const VERDICT_META = {
-  Bullish: { icon: TrendingUp,   tooltip: "Bullish — Positive outlook. News suggests the stock price may rise."  },
-  Bearish: { icon: TrendingDown, tooltip: "Bearish — Negative outlook. News suggests the stock price may fall."  },
-  Neutral: { icon: Minus,        tooltip: "Neutral — Mixed signals. No strong direction either way."              },
+  Bullish: { icon: TrendingUp,   tooltip: "Bullish — Positive outlook. News suggests the stock price may rise." },
+  Bearish: { icon: TrendingDown, tooltip: "Bearish — Negative outlook. News suggests the stock price may fall." },
+  Neutral: { icon: Minus,        tooltip: "Neutral — Mixed signals. No strong direction either way."             },
 };
 
 const VERDICT_DOT = { Bullish: "dot-bullish", Bearish: "dot-bearish", Neutral: "dot-neutral" };
 
 export default function CompanyCard({ company, onRemove }) {
+  const [sourcesOpen, setSourcesOpen] = useState(false);
+  const sourcesRef = useRef(null);
+
+  // Close popup when clicking outside
+  useEffect(() => {
+    if (!sourcesOpen) return;
+    function handle(e) {
+      if (sourcesRef.current && !sourcesRef.current.contains(e.target)) {
+        setSourcesOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handle);
+    document.addEventListener("touchstart", handle);
+    return () => {
+      document.removeEventListener("mousedown", handle);
+      document.removeEventListener("touchstart", handle);
+    };
+  }, [sourcesOpen]);
+
   const {
     id, name, ticker,
-    summary, verdict, verdict_reason, news_last_updated,
+    summary, verdict, news_last_updated,
     article_links = [], verdict_history = [],
     current_price, day_change, day_change_pct,
     roce, roe, sales_growth,
   } = company;
 
-  const changeUp    = day_change != null && day_change >= 0;
-  const changeSign  = day_change != null ? (changeUp ? "+" : "") : "";
-  const meta        = verdict ? VERDICT_META[verdict] : null;
+  const changeUp   = day_change != null && day_change >= 0;
+  const changeSign = day_change != null ? (changeUp ? "+" : "") : "";
+  const meta       = verdict ? VERDICT_META[verdict] : null;
   const VerdictIcon = meta?.icon;
 
   return (
@@ -88,34 +108,49 @@ export default function CompanyCard({ company, onRemove }) {
       {summary ? (
         <div className="summary-block">
           <p className="summary-text">{summary}</p>
-          {verdict_reason && <p className="verdict-reason">{verdict_reason}</p>}
 
-          {/* Source links */}
-          {article_links.length > 0 && (
-            <div className="source-links">
-              <span className="source-label">Sources</span>
-              {article_links.map((a, i) => (
-                <a key={i} href={a.url} target="_blank" rel="noopener noreferrer" className="source-link">
-                  <ExternalLink size={11} />
-                  <span>{a.title?.slice(0, 60)}{a.title?.length > 60 ? "…" : ""}</span>
-                </a>
-              ))}
-            </div>
-          )}
+          <div className="summary-footer">
+            {news_last_updated && (
+              <span className="news-updated">
+                <Clock size={11} />
+                {formatDate(news_last_updated)}
+              </span>
+            )}
 
-          {news_last_updated && (
-            <span className="news-updated">
-              <Clock size={11} />
-              AI summary · {formatDate(news_last_updated)}
-            </span>
-          )}
+            {article_links.length > 0 && (
+              <div className="sources-anchor" ref={sourcesRef}>
+                <button
+                  className="sources-toggle"
+                  onClick={() => setSourcesOpen(o => !o)}
+                >
+                  <Link2 size={11} />
+                  Sources ({article_links.length})
+                </button>
+
+                {sourcesOpen && (
+                  <div className="sources-popup">
+                    <div className="sources-popup-title">Sources</div>
+                    {article_links.map((a, i) => (
+                      <a
+                        key={i}
+                        href={a.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="source-link"
+                        onClick={() => setSourcesOpen(false)}
+                      >
+                        <ExternalLink size={11} />
+                        <span>{a.title?.slice(0, 80)}{a.title?.length > 80 ? "…" : ""}</span>
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       ) : (
-        <p className="no-summary">
-          {summary === null
-            ? "No recent news found for this company."
-            : "Hit Refresh to fetch the latest news."}
-        </p>
+        <p className="no-summary">No recent news found for this company.</p>
       )}
 
       {/* Fundamentals row */}
