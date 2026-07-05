@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { BarChart2, Sun, Moon } from "lucide-react";
+import { api } from "./api.js";
 import SearchBar      from "./components/SearchBar.jsx";
 import CompanyCard    from "./components/CompanyCard.jsx";
 import SkeletonCard   from "./components/SkeletonCard.jsx";
@@ -44,7 +45,7 @@ export default function App() {
 
   const fetchWatchlist = useCallback(async () => {
     try {
-      const res  = await fetch("/api/watchlist");
+      const res  = await fetch(api("/api/watchlist"));
       const data = await res.json();
       setWatchlist(data);
       return data;
@@ -64,7 +65,7 @@ export default function App() {
 
   async function handleAdd(company) {
     try {
-      const res = await fetch("/api/watchlist", {
+      const res = await fetch(api("/api/watchlist"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(company),
@@ -80,7 +81,7 @@ export default function App() {
 
   async function handleRemove(id) {
     try {
-      await fetch(`/api/watchlist/${id}`, { method: "DELETE" });
+      await fetch(api(`/api/watchlist/${id}`), { method: "DELETE" });
       setWatchlist(prev => prev.filter(c => c.id !== id));
     } catch {
       showToast("Failed to remove");
@@ -91,7 +92,7 @@ export default function App() {
     setOverlayDone(false);
     setRefreshing(true);
     try {
-      await fetch("/api/watchlist/refresh", { method: "POST" });
+      await fetch(api("/api/watchlist/refresh"), { method: "POST" });
     } catch {
       showToast("Refresh failed");
       setRefreshing(false);

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Search } from "lucide-react";
+import { api } from "../api.js";
 
 export default function SearchBar({ onAdd, watchlistTickers }) {
   const [query, setQuery] = useState("");
@@ -13,7 +14,7 @@ export default function SearchBar({ onAdd, watchlistTickers }) {
     if (query.trim().length < 2) { setResults([]); setOpen(false); return; }
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/companies/search?q=${encodeURIComponent(query)}`);
+        const res = await fetch(api(`/api/companies/search?q=${encodeURIComponent(query)}`));
         const data = await res.json();
         setResults(data);
         setOpen(true);
