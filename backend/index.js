@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import watchlistRoutes  from "./routes/watchlist.js";
+import watchlistRoutes, { restoreFromBackupIfEmpty } from "./routes/watchlist.js";
 import companiesRoutes  from "./routes/companies.js";
 import { startScheduler, runPipeline } from "./services/scheduler.js";
 import { runFundamentalsPipeline } from "./services/fundamentalsScraper.js";
@@ -19,6 +19,7 @@ app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
 
 app.listen(PORT, () => {
   console.log(`Backend running on http://localhost:${PORT}`);
+  restoreFromBackupIfEmpty();
   startScheduler();
   runPipeline(true).catch(err => console.error("[startup] Pipeline error:", err));
   runFundamentalsPipeline().catch(err => console.error("[startup] Fundamentals error:", err));

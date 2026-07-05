@@ -1,8 +1,46 @@
 import { Router } from "express";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import db from "../db/database.js";
 import { runPipeline } from "../services/scheduler.js";
 
 const router = Router();
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const BACKUP_PATH = process.env.DB_PATH
+  ? path.join(path.dirname(process.env.DB_PATH), "watchlist-backup.json")
+  : path.join(__dirname, "../db/watchlist-backup.json");
+
+function saveBackup() {
+  try {
+    const rows = db.prepare("SELECT name, ticker, aliases FROM watchlist ORDER BY added_at ASC").all();
+    const data = rows.map(r => ({ name: r.name, ticker: r.ticker, aliases: JSON.parse(r.aliases) }));
+    fs.writeFileSync(BACKUP_PATH, JSON.stringify(data, null, 2));
+  } catch (err) {
+    console.error("[backup] Failed to save watchlist backup:", err.message);
+  }
+}
+
+export function restoreFromBackupIfEmpty() {
+  try {
+    const count = db.prepare("SELECT COUNT(*) as c FROM watchlist").get().c;
+    if (count > 0) return;
+    if (!fs.existsSync(BACKUP_PATH)) return;
+    const companies = JSON.parse(fs.readFileSync(BACKUP_PATH, "utf8"));
+    let restored = 0;
+    for (const c of companies) {
+      if (!c.name || !c.ticker || !c.aliases) continue;
+      try {
+        db.prepare("INSERT OR IGNORE INTO watchlist (name, ticker, aliases) VALUES (?, ?, ?)").run(c.name, c.ticker, JSON.stringify(c.aliases));
+        restored++;
+      } catch (_) {}
+    }
+    if (restored > 0) console.log(`[backup] Restored ${restored} companies from backup.`);
+  } catch (err) {
+    console.error("[backup] Failed to restore from backup:", err.message);
+  }
+}
 
 // GET /api/watchlist — return all companies with their latest summary + price
 router.get("/", (req, res) => {
@@ -20,7 +58,6 @@ router.get("/", (req, res) => {
     ORDER BY w.added_at ASC
   `).all();
 
-  // Fetch verdict history for all companies in one query
   const allHistory = db.prepare(`
     SELECT company_id, verdict, recorded_at
     FROM verdict_history
@@ -52,10 +89,8 @@ router.post("/", (req, res) => {
   }
 
   try {
-    const stmt = db.prepare(
-      "INSERT INTO watchlist (name, ticker, aliases) VALUES (?, ?, ?)"
-    );
-    const info = stmt.run(name, ticker, JSON.stringify(aliases));
+    const info = db.prepare("INSERT INTO watchlist (name, ticker, aliases) VALUES (?, ?, ?)").run(name, ticker, JSON.stringify(aliases));
+    saveBackup();
     res.json({ id: info.lastInsertRowid, name, ticker });
   } catch (err) {
     if (err.message.includes("UNIQUE constraint")) {
@@ -68,6 +103,7 @@ router.post("/", (req, res) => {
 // DELETE /api/watchlist/:id — remove a company
 router.delete("/:id", (req, res) => {
   db.prepare("DELETE FROM watchlist WHERE id = ?").run(req.params.id);
+  saveBackup();
   res.json({ success: true });
 });
 
@@ -78,26 +114,9 @@ router.get("/export", (req, res) => {
   res.json(rows.map(r => ({ name: r.name, ticker: r.ticker, aliases: JSON.parse(r.aliases) })));
 });
 
-// POST /api/watchlist/import — restore watchlist from JSON backup
-router.post("/import", (req, res) => {
-  const companies = req.body;
-  if (!Array.isArray(companies)) return res.status(400).json({ error: "Expected an array" });
-  let imported = 0;
-  for (const c of companies) {
-    if (!c.name || !c.ticker || !c.aliases) continue;
-    try {
-      db.prepare("INSERT OR IGNORE INTO watchlist (name, ticker, aliases) VALUES (?, ?, ?)").run(c.name, c.ticker, JSON.stringify(c.aliases));
-      imported++;
-    } catch (_) {}
-  }
-  res.json({ imported });
-});
-
 // POST /api/watchlist/refresh — manually trigger the pipeline now
 router.post("/refresh", async (req, res) => {
   try {
-    // Run in background, respond immediately so UI doesn't hang
-    // forceAI=false: skips Groq if summary is <50min old, saving tokens on manual refreshes
     runPipeline(false).catch((err) => console.error("[manual refresh] Error:", err));
     res.json({ message: "Refresh started. Cards will update in ~30 seconds." });
   } catch (err) {
