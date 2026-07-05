@@ -10,6 +10,11 @@ const RSS_FEEDS = [
   "https://www.moneycontrol.com/rss/marketreports.xml",
   "https://www.livemint.com/rss/markets",
   "https://www.livemint.com/rss/companies",
+  "https://www.business-standard.com/rss/markets-106.rss",
+  "https://www.business-standard.com/rss/companies-101.rss",
+  "https://www.financialexpress.com/market/feed/",
+  "https://www.thehindubusinessline.com/markets/feeder/default.rss",
+  "https://www.thehindubusinessline.com/companies/feeder/default.rss",
 ];
 
 // Fetch all feeds and merge into one flat list of articles

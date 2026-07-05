@@ -449,7 +449,12 @@ body {
 }
 
 /* ── Card footer ── */
-.card-footer { display: flex; justify-content: flex-end; }
+.card-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
 .btn-remove {
   display: inline-flex;
   align-items: center;
@@ -465,6 +470,37 @@ body {
   transition: color 0.15s, background 0.15s;
 }
 .btn-remove:hover { color: var(--bearish); background: var(--bearish-bg); }
+
+.remove-confirm {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+.btn-confirm-yes {
+  font-size: 0.76rem;
+  padding: 3px 10px;
+  border-radius: 6px;
+  border: 1.5px solid var(--bearish);
+  background: var(--bearish-bg);
+  color: var(--bearish);
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 600;
+}
+.btn-confirm-yes:hover { opacity: 0.8; }
+.btn-confirm-no {
+  font-size: 0.76rem;
+  padding: 3px 10px;
+  border-radius: 6px;
+  border: 1.5px solid var(--border);
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+}
+.btn-confirm-no:hover { border-color: var(--text-muted); }
 
 /* ── Refresh overlay ── */
 .overlay-backdrop {

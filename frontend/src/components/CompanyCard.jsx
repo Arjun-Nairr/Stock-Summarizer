@@ -30,6 +30,7 @@ const VERDICT_DOT = { Bullish: "dot-bullish", Bearish: "dot-bearish", Neutral: "
 
 export default function CompanyCard({ company, onRemove }) {
   const [sourcesOpen, setSourcesOpen] = useState(false);
+  const [confirmRemove, setConfirmRemove] = useState(false);
   const sourcesRef = useRef(null);
 
   // Close popup when clicking outside
@@ -173,9 +174,17 @@ export default function CompanyCard({ company, onRemove }) {
         )}
 
         <div className="card-footer">
-          <button className="btn-remove" onClick={() => onRemove(id)}>
-            <Trash2 size={13} /> Remove
-          </button>
+          {confirmRemove ? (
+            <div className="remove-confirm">
+              <span>Remove {name}?</span>
+              <button className="btn-confirm-yes" onClick={() => onRemove(id)}>Yes</button>
+              <button className="btn-confirm-no" onClick={() => setConfirmRemove(false)}>Cancel</button>
+            </div>
+          ) : (
+            <button className="btn-remove" onClick={() => setConfirmRemove(true)}>
+              <Trash2 size={13} /> Remove
+            </button>
+          )}
         </div>
       </div>
     </div>
