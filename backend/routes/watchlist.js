@@ -71,6 +71,28 @@ router.delete("/:id", (req, res) => {
   res.json({ success: true });
 });
 
+// GET /api/watchlist/export — download watchlist as JSON backup
+router.get("/export", (req, res) => {
+  const rows = db.prepare("SELECT name, ticker, aliases FROM watchlist ORDER BY added_at ASC").all();
+  res.setHeader("Content-Disposition", "attachment; filename=watchlist-backup.json");
+  res.json(rows.map(r => ({ name: r.name, ticker: r.ticker, aliases: JSON.parse(r.aliases) })));
+});
+
+// POST /api/watchlist/import — restore watchlist from JSON backup
+router.post("/import", (req, res) => {
+  const companies = req.body;
+  if (!Array.isArray(companies)) return res.status(400).json({ error: "Expected an array" });
+  let imported = 0;
+  for (const c of companies) {
+    if (!c.name || !c.ticker || !c.aliases) continue;
+    try {
+      db.prepare("INSERT OR IGNORE INTO watchlist (name, ticker, aliases) VALUES (?, ?, ?)").run(c.name, c.ticker, JSON.stringify(c.aliases));
+      imported++;
+    } catch (_) {}
+  }
+  res.json({ imported });
+});
+
 // POST /api/watchlist/refresh — manually trigger the pipeline now
 router.post("/refresh", async (req, res) => {
   try {
