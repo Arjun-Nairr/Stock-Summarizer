@@ -98,11 +98,11 @@ export default function App() {
       return;
     }
     let polls = 0;
-    const prevTime = watchlist[0]?.news_last_updated ?? null;
+    const prevTime = watchlist.find(c => c.news_last_updated)?.news_last_updated ?? null;
     pollRef.current = setInterval(async () => {
       polls++;
       const data = await fetchWatchlist();
-      const newTime = data?.[0]?.news_last_updated ?? null;
+      const newTime = data?.find(c => c.news_last_updated)?.news_last_updated ?? null;
       if ((newTime && newTime !== prevTime) || polls >= 10) {
         clearInterval(pollRef.current);
         setOverlayDone(true);

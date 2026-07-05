@@ -2,6 +2,8 @@ node_modules/
 .wrangler/
 backend/.env
 backend/db/stock_news.db
+backend/db/stock_news.db-shm
+backend/db/stock_news.db-wal
 frontend/.claude/
 dist/
 .DS_Store

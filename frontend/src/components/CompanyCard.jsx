@@ -106,78 +106,77 @@ export default function CompanyCard({ company, onRemove }) {
 
       {/* Summary */}
       {summary ? (
-        <div className="summary-block">
-          <p className="summary-text">{summary}</p>
-
-          <div className="summary-footer">
-            {news_last_updated && (
-              <span className="news-updated">
-                <Clock size={11} />
-                {formatDate(news_last_updated)}
-              </span>
-            )}
-
-            {article_links.length > 0 && (
-              <div className="sources-anchor" ref={sourcesRef}>
-                <button
-                  className="sources-toggle"
-                  onClick={() => setSourcesOpen(o => !o)}
-                >
-                  <Link2 size={11} />
-                  Sources ({article_links.length})
-                </button>
-
-                {sourcesOpen && (
-                  <div className="sources-popup">
-                    <div className="sources-popup-title">Sources</div>
-                    {article_links.map((a, i) => (
-                      <a
-                        key={i}
-                        href={a.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="source-link"
-                        onClick={() => setSourcesOpen(false)}
-                      >
-                        <ExternalLink size={11} />
-                        <span>{a.title?.slice(0, 80)}{a.title?.length > 80 ? "…" : ""}</span>
-                      </a>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
+        <p className="summary-text">{summary}</p>
       ) : (
         <p className="no-summary">No recent news found for this company.</p>
       )}
 
-      {/* Fundamentals row */}
-      {(roce != null || roe != null || sales_growth != null) && (
-        <div className="fundamentals-row">
-          <span className="fundamental-item">
-            <span className="fundamental-label">ROCE</span>
-            <span className="fundamental-value">{fmtFundamental(roce)}</span>
-          </span>
-          <span className="fundamental-sep">·</span>
-          <span className="fundamental-item">
-            <span className="fundamental-label">ROE</span>
-            <span className="fundamental-value">{fmtFundamental(roe)}</span>
-          </span>
-          <span className="fundamental-sep">·</span>
-          <span className="fundamental-item">
-            <span className="fundamental-label">3yr Sales Growth</span>
-            <span className="fundamental-value">{fmtFundamental(sales_growth)}</span>
-          </span>
-        </div>
-      )}
+      {/* Bottom section — date, sources, fundamentals, remove all pinned together */}
+      <div className="card-bottom">
+        <div className="summary-footer">
+          {news_last_updated && (
+            <span className="news-updated">
+              <Clock size={11} />
+              {formatDate(news_last_updated)}
+            </span>
+          )}
 
-      {/* Footer */}
-      <div className="card-footer">
-        <button className="btn-remove" onClick={() => onRemove(id)}>
-          <Trash2 size={13} /> Remove
-        </button>
+          {article_links.length > 0 && (
+            <div className="sources-anchor" ref={sourcesRef}>
+              <button
+                className="sources-toggle"
+                onClick={() => setSourcesOpen(o => !o)}
+              >
+                <Link2 size={11} />
+                Sources ({article_links.length})
+              </button>
+
+              {sourcesOpen && (
+                <div className="sources-popup">
+                  <div className="sources-popup-title">Sources</div>
+                  {article_links.map((a, i) => (
+                    <a
+                      key={i}
+                      href={a.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="source-link"
+                      onClick={() => setSourcesOpen(false)}
+                    >
+                      <ExternalLink size={11} />
+                      <span>{a.title?.slice(0, 80)}{a.title?.length > 80 ? "…" : ""}</span>
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {(roce != null || roe != null || sales_growth != null) && (
+          <div className="fundamentals-row">
+            <span className="fundamental-item">
+              <span className="fundamental-label">ROCE</span>
+              <span className="fundamental-value">{fmtFundamental(roce)}</span>
+            </span>
+            <span className="fundamental-sep">·</span>
+            <span className="fundamental-item">
+              <span className="fundamental-label">ROE</span>
+              <span className="fundamental-value">{fmtFundamental(roe)}</span>
+            </span>
+            <span className="fundamental-sep">·</span>
+            <span className="fundamental-item">
+              <span className="fundamental-label">3yr Sales Growth</span>
+              <span className="fundamental-value">{fmtFundamental(sales_growth)}</span>
+            </span>
+          </div>
+        )}
+
+        <div className="card-footer">
+          <button className="btn-remove" onClick={() => onRemove(id)}>
+            <Trash2 size={13} /> Remove
+          </button>
+        </div>
       </div>
     </div>
   );

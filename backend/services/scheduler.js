@@ -89,6 +89,11 @@ async function processCompany(company, allArticles, forceAI = false) {
   }
 }
 
+const BATCH_SIZE  = 8;   // max concurrent Groq calls — keeps us under 30 RPM free tier limit
+const BATCH_DELAY = 2000; // ms pause between batches
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
 // forceAI: true when called by the hourly scheduler (fresh cycle), false for manual refreshes
 async function runPipeline(forceAI = false) {
   const companies = db.prepare("SELECT * FROM watchlist").all();
@@ -107,7 +112,16 @@ async function runPipeline(forceAI = false) {
     console.error("[pipeline] RSS fetch failed:", err.message);
   }
 
-  await Promise.allSettled(companies.map((c) => processCompany(c, allArticles, forceAI)));
+  // Process in batches to avoid hitting Groq rate limits (30 RPM free tier)
+  for (let i = 0; i < companies.length; i += BATCH_SIZE) {
+    const batch = companies.slice(i, i + BATCH_SIZE);
+    await Promise.allSettled(batch.map(c => processCompany(c, allArticles, forceAI)));
+    if (i + BATCH_SIZE < companies.length) {
+      console.log(`[pipeline] Batch ${Math.floor(i / BATCH_SIZE) + 1} done, pausing before next...`);
+      await sleep(BATCH_DELAY);
+    }
+  }
+
   console.log("[pipeline] Run complete.");
 }
 

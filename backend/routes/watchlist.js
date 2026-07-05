@@ -24,7 +24,9 @@ router.get("/", (req, res) => {
   const allHistory = db.prepare(`
     SELECT company_id, verdict, recorded_at
     FROM verdict_history
+    WHERE company_id IN (SELECT id FROM watchlist)
     ORDER BY recorded_at DESC
+    LIMIT 500
   `).all();
 
   const historyMap = {};

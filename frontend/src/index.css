@@ -23,8 +23,8 @@
   --surface: #ffffff;
   --surface-hover: #f4f6fb;
   --border: #dde0ec;
-  --text: #1a1d2e;
-  --text-muted: #6b709a;
+  --text: #0f1a3d;
+  --text-muted: #3d4d7a;
   --accent: #3b6fd4;
   --bullish: #16a34a;
   --bullish-bg: rgba(22,163,74,0.10);
@@ -365,7 +365,7 @@ body {
 
 /* ── Summary block ── */
 .summary-block { display: flex; flex-direction: column; gap: 10px; }
-.summary-text  { font-size: 0.89rem; color: #c4c8df; line-height: 1.75; overflow-wrap: break-word; word-break: break-word; }
+.summary-text  { font-size: 0.89rem; color: var(--text); line-height: 1.75; overflow-wrap: break-word; word-break: break-word; opacity: 0.88; }
 .summary-footer {
   display: flex;
   align-items: center;
@@ -438,8 +438,18 @@ body {
 .fundamental-value { font-size: 0.82rem; font-weight: 600; color: var(--text); }
 .fundamental-sep { color: var(--border); font-size: 0.9rem; }
 
+/* ── Card bottom ── */
+.card-bottom {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
 /* ── Card footer ── */
-.card-footer { display: flex; justify-content: flex-end; margin-top: auto; padding-top: 6px; }
+.card-footer { display: flex; justify-content: flex-end; }
 .btn-remove {
   display: inline-flex;
   align-items: center;

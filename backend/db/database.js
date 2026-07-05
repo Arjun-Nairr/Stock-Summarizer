@@ -3,7 +3,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DB_PATH = path.join(__dirname, "stock_news.db");
+const DB_PATH = process.env.DB_PATH || path.join(__dirname, "stock_news.db");
 
 const db = new DatabaseSync(DB_PATH);
 
@@ -60,23 +60,9 @@ db.exec(`
     FOREIGN KEY (company_id) REFERENCES watchlist(id) ON DELETE CASCADE
   );
 
-  CREATE TABLE IF NOT EXISTS daily_picks (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    action TEXT,
-    target_price TEXT,
-    analyst TEXT,
-    source_url TEXT,
-    fetched_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  );
 `);
 
 // Add article_links column to existing DBs that predate this schema
 try { db.exec("ALTER TABLE news_summaries ADD COLUMN article_links TEXT DEFAULT '[]'"); } catch (_) {}
-// Add price columns to daily_picks for existing DBs
-try { db.exec("ALTER TABLE daily_picks ADD COLUMN ticker TEXT"); } catch (_) {}
-try { db.exec("ALTER TABLE daily_picks ADD COLUMN current_price REAL"); } catch (_) {}
-try { db.exec("ALTER TABLE daily_picks ADD COLUMN day_change REAL"); } catch (_) {}
-try { db.exec("ALTER TABLE daily_picks ADD COLUMN day_change_pct REAL"); } catch (_) {}
 
 export default db;
